@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>😈 Gotcha</title>
+  <title>Totally Not a Rickroll</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     html, body {
@@ -14,17 +14,31 @@
       justify-content: center;
     }
     iframe {
-      border: none;
       width: 100vw;
       height: 100vh;
+      border: none;
     }
   </style>
 </head>
 <body>
   <iframe 
-    src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=0&controls=0&rel=0&modestbranding=1&loop=1&playlist=dQw4w9WgXcQ" 
+    id="rickroll"
+    src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1&controls=0&rel=0&modestbranding=1&loop=1&playlist=dQw4w9WgXcQ" 
     allow="autoplay; encrypted-media" 
     allowfullscreen>
   </iframe>
+
+  <script>
+    // Try to unmute after interaction
+    document.body.addEventListener('click', function unmuteVideo() {
+      const iframe = document.getElementById('rickroll');
+      iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
+      document.body.removeEventListener('click', unmuteVideo);
+    });
+
+    // Enable JS API for controlling playback
+    const rick = document.getElementById('rickroll');
+    rick.src += '&enablejsapi=1';
+  </script>
 </body>
 </html>
