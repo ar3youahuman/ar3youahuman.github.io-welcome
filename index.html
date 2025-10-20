@@ -1,44 +1,998 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Totally Not a Rickroll</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    html, body {
-      margin: 0;
-      height: 100%;
-      background: black;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Name / Logo</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+  :root {
+    --primary-color: #8A2BE2;
+    --secondary-color: #D3D3D3;
+    --accent-color: #4B0082;
+    --tertiary-color: #696969;
+    --bg-dark: rgba(0,0,0,0.95);
+    --glass-bg: rgba(255,255,255,0.03);
+    --glass-border: rgba(138,43,226,0.2);
+    --neon-glow: rgba(138,43,226,0.4);
+    --text-glow: rgba(138,43,226,0.6);
+    --shadow-primary: rgba(138,43,226,0.3);
+    --shadow-secondary: rgba(0,0,0,0.6);
+    --gradient-1: linear-gradient(135deg, #8A2BE2, #4B0082);
+    --gradient-2: linear-gradient(135deg, #4B0082, #696969);
+    --gradient-3: linear-gradient(135deg, #696969, #D3D3D3);
+  }
+
+  * { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+    font-family: 'Exo 2', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+  }
+
+  html, body {
+    height: 100%;
+    overflow-x: hidden;
+    background: 
+      radial-gradient(ellipse at top, rgba(138,43,226,0.1) 0%, transparent 50%),
+      radial-gradient(ellipse at bottom, rgba(75,0,130,0.05) 0%, transparent 50%),
+      linear-gradient(135deg, #000000 0%, #1a0a2e 25%, #2d1b69 50%, #1a0a2e 75%, #000000 100%);
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 12px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.3);
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+    border-radius: 10px;
+    box-shadow: 0 0 10px var(--neon-glow);
+  }
+
+  /* Loading screen */
+  .loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #0c0c0c 0%, #1a0a2e 50%, #16213e 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease;
+  }
+
+  .loader.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .loader-logo {
+    font-size: 4rem;
+    font-family: 'Orbitron', monospace;
+    color: var(--primary-color);
+    text-shadow: 0 0 20px var(--text-glow);
+    animation: logoGlow 2s ease-in-out infinite alternate;
+    margin-bottom: 2rem;
+  }
+
+  .progress-bar {
+    width: 300px;
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    width: 0%;
+    border-radius: 2px;
+    box-shadow: 0 0 10px var(--neon-glow);
+    animation: progressLoad 3s ease-in-out forwards;
+  }
+
+  /* Cursor trail pool */
+  .cursor-trail {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    background: radial-gradient(circle, var(--primary-color), transparent);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.3s ease-out;
+  }
+
+  .cursor-trail.active {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+
+  /* Sophisticated particle system */
+  .particle {
+    position: fixed;
+    width: 2px;
+    height: 2px;
+    background: var(--tertiary-color);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: -1;
+    box-shadow: 0 0 4px var(--tertiary-color);
+    opacity: 0.6;
+  }
+
+  .particle:nth-child(odd) {
+    background: var(--accent-color);
+    box-shadow: 0 0 3px var(--accent-color);
+  }
+
+  .particle:nth-child(3n) {
+    background: var(--secondary-color);
+    box-shadow: 0 0 2px var(--secondary-color);
+    opacity: 0.4;
+  }
+
+  /* Video background - perfectly centered camera */
+  #bg-video {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    object-position: center center;
+    transform: translate(-50%, -50%);
+    z-index: -3;
+    filter: brightness(0.2) contrast(1.3) saturate(0.8);
+  }
+
+  /* Complex layered background overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: 
+      radial-gradient(ellipse at 15% 85%, rgba(138,43,226,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 85% 15%, rgba(75,0,130,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse at 50% 50%, rgba(105,105,105,0.04) 0%, transparent 70%),
+      radial-gradient(ellipse at 25% 25%, rgba(211,211,211,0.02) 0%, transparent 80%);
+    z-index: -2;
+    animation: backgroundPulse 20s ease-in-out infinite;
+  }
+
+  /* Additional background layers for complexity */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: 
+      linear-gradient(45deg, transparent 48%, rgba(138,43,226,0.01) 49%, rgba(138,43,226,0.01) 51%, transparent 52%),
+      linear-gradient(-45deg, transparent 48%, rgba(75,0,130,0.01) 49%, rgba(75,0,130,0.01) 51%, transparent 52%);
+    background-size: 60px 60px;
+    z-index: -2;
+    animation: gridMove 30s linear infinite;
+  }
+
+  /* Sophisticated wave system */
+  .wave-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 300px;
+    z-index: -2;
+    overflow: hidden;
+  }
+
+  .wave {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 300%;
+    height: 100%;
+    opacity: 0.03;
+  }
+
+  .wave:nth-child(1) {
+    animation: waveMove1 12s ease-in-out infinite;
+    background: var(--gradient-1);
+    height: 80%;
+  }
+
+  .wave:nth-child(2) {
+    animation: waveMove2 15s ease-in-out infinite;
+    background: var(--gradient-2);
+    opacity: 0.02;
+    height: 60%;
+  }
+
+  .wave:nth-child(3) {
+    animation: waveMove3 18s ease-in-out infinite;
+    background: var(--gradient-3);
+    opacity: 0.015;
+    height: 40%;
+  }
+
+  .wave:nth-child(4) {
+    animation: waveMove4 22s ease-in-out infinite;
+    background: linear-gradient(45deg, var(--tertiary-color), var(--secondary-color));
+    opacity: 0.01;
+    height: 20%;
+  }
+
+
+  /* Sophisticated central frame */
+  .frame {
+    position: relative;
+    width: 85%;
+    max-width: 1400px;
+    margin: 100px auto;
+    padding: 100px 80px;
+    background: 
+      linear-gradient(135deg, var(--glass-bg) 0%, rgba(138,43,226,0.02) 50%, var(--glass-bg) 100%),
+      radial-gradient(ellipse at center, rgba(138,43,226,0.1) 0%, transparent 70%);
+    backdrop-filter: blur(25px) saturate(1.2);
+    border-radius: 50px;
+    border: 2px solid var(--glass-border);
+    box-shadow: 
+      0 20px 60px var(--shadow-secondary),
+      0 8px 32px var(--shadow-primary),
+      inset 0 2px 0 rgba(138,43,226,0.1),
+      inset 0 -2px 0 rgba(0,0,0,0.3);
+    text-align: center;
+    z-index: 1;
+    animation: frameEntrance 1.2s ease-out, frameFloat 8s ease-in-out infinite, frameGlow 6s ease-in-out infinite;
+    overflow: hidden;
+    transform-style: preserve-3d;
+  }
+
+  .frame::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    animation: shimmer 3s infinite;
+  }
+
+  /* Static gradient border */
+  .frame::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, var(--primary-color), var(--accent-color), #00ffff, var(--primary-color));
+    border-radius: 42px;
+    z-index: -1;
+  }
+
+  /* Typing animation for heading with realistic cursor */
+  .frame h1 {
+    font-size: 4rem;
+    font-family: 'Orbitron', monospace;
+    color: var(--primary-color);
+    letter-spacing: 3px;
+    font-weight: 900;
+    margin-bottom: 80px;
+    text-shadow: 0 0 30px var(--text-glow);
+    animation: typing 3s steps(20) 1s both, textGlow 2s ease-in-out 4s infinite alternate;
+    white-space: nowrap;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .frame h1::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--primary-color);
+    animation: cursorBlink 1s infinite;
+  }
+
+  /* Enhanced buttons with more animations */
+  .btn {
+    display: block;
+    width: 70%;
+    padding: 25px 0;
+    margin: 25px auto;
+    background: linear-gradient(135deg, rgba(138,43,226,0.8), rgba(75,0,130,0.9));
+    border-radius: 30px;
+    color: var(--secondary-color);
+    font-size: 1.6rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 
+      0 10px 30px rgba(0,0,0,0.4),
+      0 0 20px rgba(138,43,226,0.3),
+      inset 0 1px 0 rgba(211,211,211,0.2);
+    transform-style: preserve-3d;
+    animation: buttonGlow 4s ease-in-out infinite;
+  }
+
+  .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255,255,255,0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  .btn:hover {
+    transform: translateY(-5px) scale(1.05) rotateX(10deg);
+    box-shadow: 
+      0 20px 40px rgba(0,0,0,0.5),
+      0 0 40px rgba(138,43,226,0.8),
+      inset 0 1px 0 rgba(211,211,211,0.3);
+    background: linear-gradient(135deg, rgba(138,43,226,0.9), rgba(75,0,130,0.9));
+  }
+
+  .btn:hover::before {
+    left: 100%;
+  }
+
+  .btn:active {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 
+      0 5px 15px rgba(0,0,0,0.4),
+      0 0 20px rgba(138,43,226,0.6);
+  }
+
+  .btn:active::after {
+    width: 300px;
+    height: 300px;
+  }
+
+  /* Button icons */
+  .btn i {
+    margin-right: 15px;
+    font-size: 1.4rem;
+    animation: iconPulse 2s ease-in-out infinite;
+  }
+
+  /* Magnetic effect for buttons */
+  .btn.magnetic {
+    transition: transform 0.1s ease-out;
+  }
+
+  /* Ripple effect */
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.6);
+    transform: scale(0);
+    animation: rippleEffect 0.6s linear;
+    pointer-events: none;
+  }
+
+
+  /* Liquid blob animations */
+  .blob {
+    position: fixed;
+    border-radius: 50%;
+    background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+    opacity: 0.1;
+    z-index: -1;
+    animation: blobMove 20s infinite;
+  }
+
+  .blob:nth-child(1) {
+    width: 300px;
+    height: 300px;
+    top: 10%;
+    left: 10%;
+    animation-delay: 0s;
+  }
+
+  .blob:nth-child(2) {
+    width: 200px;
+    height: 200px;
+    top: 60%;
+    right: 10%;
+    animation-delay: 7s;
+  }
+
+  .blob:nth-child(3) {
+    width: 150px;
+    height: 150px;
+    bottom: 20%;
+    left: 20%;
+    animation-delay: 14s;
+  }
+
+  /* Keyframe animations */
+  @keyframes logoGlow {
+    0%, 100% { text-shadow: 0 0 20px var(--text-glow); }
+    50% { text-shadow: 0 0 40px var(--text-glow), 0 0 60px var(--primary-color); }
+  }
+
+  @keyframes progressLoad {
+    0% { width: 0%; }
+    100% { width: 100%; }
+  }
+
+  @keyframes trailFade {
+    0% { opacity: 0.7; transform: scale(1); }
+    100% { opacity: 0; transform: scale(0.5); }
+  }
+
+
+  @keyframes frameEntrance {
+    0% { 
+      opacity: 0; 
+      transform: translateY(50px) scale(0.9); 
     }
-    iframe {
-      width: 100vw;
-      height: 100vh;
-      border: none;
+    100% { 
+      opacity: 1; 
+      transform: translateY(0) scale(1); 
     }
-  </style>
+  }
+
+  @keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
+
+
+  @keyframes typing {
+    0% { width: 0; }
+    100% { width: 100%; }
+  }
+
+  @keyframes cursorBlink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
+  @keyframes waveMove1 {
+    0%, 100% { transform: translateX(-50%) translateY(0px) rotate(0deg); }
+    50% { transform: translateX(-30%) translateY(-20px) rotate(2deg); }
+  }
+
+  @keyframes waveMove2 {
+    0%, 100% { transform: translateX(-40%) translateY(0px) rotate(0deg); }
+    50% { transform: translateX(-20%) translateY(-15px) rotate(-1deg); }
+  }
+
+  @keyframes waveMove3 {
+    0%, 100% { transform: translateX(-60%) translateY(0px) rotate(0deg); }
+    50% { transform: translateX(-40%) translateY(-10px) rotate(1deg); }
+  }
+
+  @keyframes waveMove4 {
+    0%, 100% { transform: translateX(-70%) translateY(0px) rotate(0deg); }
+    50% { transform: translateX(-50%) translateY(-5px) rotate(-0.5deg); }
+  }
+
+  @keyframes gridMove {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(60px, 60px); }
+  }
+
+  @keyframes frameGlow {
+    0%, 100% { 
+      box-shadow: 
+        0 20px 60px var(--shadow-secondary),
+        0 8px 32px var(--shadow-primary),
+        inset 0 2px 0 rgba(138,43,226,0.1),
+        inset 0 -2px 0 rgba(0,0,0,0.3);
+    }
+    50% { 
+      box-shadow: 
+        0 25px 80px var(--shadow-secondary),
+        0 12px 40px var(--shadow-primary),
+        inset 0 2px 0 rgba(138,43,226,0.15),
+        inset 0 -2px 0 rgba(0,0,0,0.4);
+    }
+  }
+
+  @keyframes backgroundPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.02); }
+  }
+
+  @keyframes frameFloat {
+    0%, 100% { transform: translateY(0px) rotateX(0deg); }
+    50% { transform: translateY(-10px) rotateX(2deg); }
+  }
+
+  @keyframes buttonGlow {
+    0%, 100% { box-shadow: 0 10px 30px rgba(0,0,0,0.4), 0 0 20px rgba(138,43,226,0.3); }
+    50% { box-shadow: 0 15px 40px rgba(0,0,0,0.5), 0 0 30px rgba(138,43,226,0.6); }
+  }
+
+  @keyframes textGlow {
+    0%, 100% { text-shadow: 0 0 30px var(--text-glow); }
+    50% { text-shadow: 0 0 50px var(--text-glow), 0 0 70px var(--primary-color); }
+  }
+
+  @keyframes iconPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+
+  @keyframes rippleEffect {
+    0% { transform: scale(0); opacity: 1; }
+    100% { transform: scale(4); opacity: 0; }
+  }
+
+
+  @keyframes blobMove {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(100px, -50px) scale(1.1); }
+    50% { transform: translate(-50px, -100px) scale(0.9); }
+    75% { transform: translate(-100px, 50px) scale(1.05); }
+  }
+
+  @keyframes particleFloat {
+    0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
+    50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 20px rgba(128,0,255,0.5); }
+    50% { transform: scale(1.08); box-shadow: 0 0 50px rgba(186,85,211,0.8); }
+    100% { transform: scale(1); box-shadow: 0 0 20px rgba(128,0,255,0.5); }
+  }
+
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .frame {
+      width: 95%;
+      padding: 40px 30px;
+      margin: 40px auto;
+    }
+    
+    .frame h1 {
+      font-size: 2.5rem;
+      letter-spacing: 2px;
+    }
+    
+    .btn {
+      width: 90%;
+      padding: 20px 0;
+      font-size: 1.3rem;
+    }
+    
+    .fab {
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      font-size: 1.2rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .frame h1 {
+      font-size: 2rem;
+      letter-spacing: 1px;
+    }
+    
+    .btn {
+      font-size: 1.1rem;
+      padding: 18px 0;
+    }
+  }
+
+  /* Dark theme */
+  .dark-theme {
+    --primary-color: #ff6b6b;
+    --secondary-color: #ffd93d;
+    --accent-color: #6bcf7f;
+    --bg-dark: rgba(20,20,20,0.9);
+    --neon-glow: rgba(255,107,107,0.7);
+    --text-glow: rgba(255,107,107,0.8);
+  }
+
+  .dark-theme body::after {
+    background: 
+      radial-gradient(circle at 20% 80%, rgba(255, 107, 107, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 217, 61, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(107, 207, 127, 0.2) 0%, transparent 50%);
+  }
+
+  /* Accessibility */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* Focus indicators */
+  .btn:focus {
+    outline: 3px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
 </head>
 <body>
-  <iframe 
-    id="rickroll"
-    src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1&controls=0&rel=0&modestbranding=1&loop=1&playlist=dQw4w9WgXcQ" 
-    allow="autoplay; encrypted-media" 
-    allowfullscreen>
-  </iframe>
 
-  <script>
-    // Try to unmute after interaction
-    document.body.addEventListener('click', function unmuteVideo() {
-      const iframe = document.getElementById('rickroll');
-      iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
-      document.body.removeEventListener('click', unmuteVideo);
+<!-- Loading screen -->
+<div class="loader" id="loader">
+  <div class="loader-logo">PORTFOLIO</div>
+  <div class="progress-bar">
+    <div class="progress-fill"></div>
+  </div>
+</div>
+
+
+<!-- Video background -->
+<video autoplay muted loop id="bg-video" playsinline>
+  <source src="background.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<!-- Liquid blobs -->
+<div class="blob"></div>
+<div class="blob"></div>
+<div class="blob"></div>
+
+<!-- Sophisticated wave background -->
+<div class="wave-container">
+  <div class="wave"></div>
+  <div class="wave"></div>
+  <div class="wave"></div>
+  <div class="wave"></div>
+</div>
+
+<div class="frame">
+  <h1 id="mainTitle">Your Name / Logo</h1>
+  <a href="https://ar3youahuman.com/about" class="btn magnetic" data-icon="user">
+    <i class="fas fa-user"></i>About Me
+  </a>
+  <a href="https://ar3youahuman.com/contact" class="btn magnetic" data-icon="envelope">
+    <i class="fas fa-envelope"></i>Contact
+  </a>
+  <a href="https://ar3youahuman.com/projects" class="btn magnetic" data-icon="code">
+    <i class="fas fa-code"></i>Projects
+  </a>
+  <a href="https://ar3youahuman.com/blog" class="btn magnetic" data-icon="blog">
+    <i class="fas fa-blog"></i>Blog
+  </a>
+  <a href="https://ar3youahuman.com/extras" class="btn magnetic" data-icon="star">
+    <i class="fas fa-star"></i>Extras
+  </a>
+</div>
+
+<script>
+  // Global variables
+  let particles = [];
+  let mouseX = 0;
+  let mouseY = 0;
+  let trailPool = [];
+  let trailIndex = 0;
+  let isDarkTheme = false;
+
+  // Initialize everything when DOM is loaded
+  document.addEventListener('DOMContentLoaded', function() {
+    initializeLoader();
+    initializeParticles();
+    initializeCursorTrail();
+    initializeMagneticButtons();
+    initializeAccessibility();
+    initializePerformanceMonitoring();
+    initializeAdvancedMonitoring();
+  });
+
+  // Loading screen
+  function initializeLoader() {
+    const loader = document.getElementById('loader');
+    const progressFill = document.querySelector('.progress-fill');
+    
+    // Simulate loading progress
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.random() * 15;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(interval);
+        setTimeout(() => {
+          loader.classList.add('hidden');
+          setTimeout(() => {
+            loader.style.display = 'none';
+          }, 500);
+        }, 500);
+      }
+      progressFill.style.width = progress + '%';
+    }, 100);
+  }
+
+  // Floating particles system
+  function initializeParticles() {
+    const particleCount = 50;
+    
+    for (let i = 0; i < particleCount; i++) {
+      createParticle();
+    }
+    
+    // Animate particles
+    animateParticles();
+  }
+
+  function createParticle() {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    particle.style.left = Math.random() * window.innerWidth + 'px';
+    particle.style.top = Math.random() * window.innerHeight + 'px';
+    particle.style.animationDelay = Math.random() * 5 + 's';
+    particle.style.animationDuration = (Math.random() * 10 + 5) + 's';
+    document.body.appendChild(particle);
+    particles.push(particle);
+  }
+
+  function animateParticles() {
+    particles.forEach(particle => {
+      const x = Math.random() * window.innerWidth;
+      const y = Math.random() * window.innerHeight;
+      const duration = Math.random() * 10 + 5;
+      
+      particle.style.transition = `all ${duration}s linear`;
+      particle.style.left = x + 'px';
+      particle.style.top = y + 'px';
     });
+    
+    setTimeout(animateParticles, 10000);
+  }
 
-    // Enable JS API for controlling playback
-    const rick = document.getElementById('rickroll');
-    rick.src += '&enablejsapi=1';
-  </script>
+  // Optimized cursor trail with pool system
+  function initializeCursorTrail() {
+    // Create trail pool
+    for (let i = 0; i < 20; i++) {
+      const trail = document.createElement('div');
+      trail.className = 'cursor-trail';
+      trail.style.display = 'none';
+      document.body.appendChild(trail);
+      trailPool.push(trail);
+    }
+
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      
+      createTrail(e.clientX, e.clientY);
+    });
+  }
+
+  function createTrail(x, y) {
+    const trail = trailPool[trailIndex];
+    trail.style.left = x + 'px';
+    trail.style.top = y + 'px';
+    trail.style.display = 'block';
+    trail.classList.add('active');
+    
+    setTimeout(() => {
+      trail.classList.remove('active');
+      setTimeout(() => {
+        trail.style.display = 'none';
+      }, 300);
+    }, 200);
+    
+    trailIndex = (trailIndex + 1) % trailPool.length;
+  }
+
+  // Magnetic button effects
+  function initializeMagneticButtons() {
+    const buttons = document.querySelectorAll('.btn.magnetic');
+    
+    buttons.forEach(btn => {
+      btn.addEventListener('mousemove', (e) => {
+        const rect = btn.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        
+        btn.style.transform = `translate(${x * 0.1}px, ${y * 0.1}px) scale(1.05)`;
+      });
+      
+      btn.addEventListener('mouseleave', () => {
+        btn.style.transform = 'translate(0, 0) scale(1)';
+      });
+      
+      btn.addEventListener('click', createRipple);
+    });
+  }
+
+  // Ripple effect on click
+  function createRipple(e) {
+    const btn = e.currentTarget;
+    const rect = btn.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = e.clientX - rect.left - size / 2;
+    const y = e.clientY - rect.top - size / 2;
+    
+    const ripple = document.createElement('div');
+    ripple.className = 'ripple';
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = x + 'px';
+    ripple.style.top = y + 'px';
+    
+    btn.appendChild(ripple);
+    
+    setTimeout(() => {
+      ripple.remove();
+    }, 600);
+  }
+
+
+  // Accessibility features
+  function initializeAccessibility() {
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab') {
+        document.body.classList.add('keyboard-navigation');
+      }
+    });
+    
+    document.addEventListener('mousedown', () => {
+      document.body.classList.remove('keyboard-navigation');
+    });
+    
+    // Skip to content link
+    const skipLink = document.createElement('a');
+    skipLink.href = '#main';
+    skipLink.textContent = 'Skip to main content';
+    skipLink.style.cssText = `
+      position: absolute;
+      top: -40px;
+      left: 6px;
+      background: var(--primary-color);
+      color: white;
+      padding: 8px;
+      text-decoration: none;
+      border-radius: 4px;
+      z-index: 10000;
+      transition: top 0.3s;
+    `;
+    skipLink.addEventListener('focus', () => {
+      skipLink.style.top = '6px';
+    });
+    skipLink.addEventListener('blur', () => {
+      skipLink.style.top = '-40px';
+    });
+    document.body.insertBefore(skipLink, document.body.firstChild);
+  }
+
+  // Performance monitoring
+  function initializePerformanceMonitoring() {
+    // Monitor FPS
+    let lastTime = performance.now();
+    let frameCount = 0;
+    
+    function measureFPS() {
+      frameCount++;
+      const currentTime = performance.now();
+      
+      if (currentTime - lastTime >= 1000) {
+        const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
+        
+        // Only show FPS in development
+        if (window.location.hostname === 'localhost') {
+          console.log(`FPS: ${fps}`);
+        }
+        
+        frameCount = 0;
+        lastTime = currentTime;
+      }
+      
+      requestAnimationFrame(measureFPS);
+    }
+    
+    measureFPS();
+  }
+
+  // Enhanced hover effects
+  document.querySelectorAll('.btn').forEach(btn => {
+    btn.addEventListener('mouseenter', () => {
+      btn.style.animation = 'pulse 0.6s ease-in-out';
+    });
+    btn.addEventListener('animationend', () => {
+      btn.style.animation = '';
+    });
+  });
+
+  // Fixed camera - no parallax scrolling
+
+  // Intersection Observer for scroll animations
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.animation = 'frameEntrance 1s ease-out';
+      }
+    });
+  }, observerOptions);
+
+  // Observe frame for scroll animations
+  const frame = document.querySelector('.frame');
+  observer.observe(frame);
+
+  // Advanced performance monitoring
+  function initializeAdvancedMonitoring() {
+    // Monitor memory usage
+    if ('memory' in performance) {
+      setInterval(() => {
+        const memory = performance.memory;
+        if (window.location.hostname === 'localhost') {
+          console.log(`Memory: ${Math.round(memory.usedJSHeapSize / 1048576)}MB / ${Math.round(memory.totalJSHeapSize / 1048576)}MB`);
+        }
+      }, 10000);
+    }
+  }
+
+  // Error handling for video
+  const video = document.getElementById('bg-video');
+  video.addEventListener('error', () => {
+    console.log('Video failed to load, using fallback background');
+    document.body.style.background = 'linear-gradient(135deg, #0c0c0c 0%, #1a0a2e 50%, #16213e 100%)';
+  });
+
+  // Preload critical resources
+  const preloadLink = document.createElement('link');
+  preloadLink.rel = 'preload';
+  preloadLink.href = 'background.mp4';
+  preloadLink.as = 'video';
+  document.head.appendChild(preloadLink);
+</script>
+
 </body>
 </html>
